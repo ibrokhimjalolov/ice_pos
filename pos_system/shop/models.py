@@ -24,7 +24,7 @@ class Product(models.Model):
     title = models.CharField(max_length=500, unique=True)
     price = models.PositiveIntegerField()
     count_in_box = models.PositiveIntegerField(default=1)
-    stock_quantity = models.PositiveBigIntegerField(default=0, editable=False)
+    stock_quantity = models.PositiveBigIntegerField(default=0)
     
     
     def __str__(self) -> str:
@@ -36,6 +36,9 @@ class Product(models.Model):
             return self.consumer_prices.get(consumer=consumer).price
         except ProductConsumerPrice.DoesNotExist:
             return self.price
+        
+    def warehouse_quantity(self):
+        return "%s / %s" % (self.stock_quantity, self.count_in_box)
 
 
 
