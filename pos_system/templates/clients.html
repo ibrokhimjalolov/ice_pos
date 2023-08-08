@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+  <div class="card card-custom gutter-b">
+    <div class="card-header flex-wrap py-3">
+      <div class="card-title">
+        <h3 class="card-label">
+          Tovarlar
+          <span class="d-block text-muted pt-2 font-size-sm">Barcha tovarlar</span>
+        </h3>
+      </div>
+      <div class="card-toolbar">
+        <!-- begin::Button -->
+
+        <a href="/products/create/" class="btn btn-primary font-weight-bolder">
+          <span class="svg-icon svg-icon-md">
+            <!-- begin::Svg Icon | path:assets/media/svg/icons/Design/Flatten.svg -->
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <rect x="0" y="0" width="24" height="24"></rect>
+                <circle fill="#000000" cx="9" cy="15" r="6"></circle>
+                <path d="M8.8012943,7.00241953 C9.83837775,5.20768121 11.7781543,4 14,4 C17.3137085,4 20,6.6862915 20,10 C20,12.2218457 18.7923188,14.1616223 16.9975805,15.1987057 C16.9991904,15.1326658 17,15.0664274 17,15 C17,10.581722 13.418278,7 9,7 C8.93357256,7 8.86733422,7.00080962 8.8012943,7.00241953 Z" fill="#000000" opacity="0.3"></path>
+              </g>
+            </svg>
+            <!-- end::Svg Icon -->
+          </span>Yangi qo'shish
+        </a>
+
+        <!-- end::Button -->
+      </div>
+    </div>
+    <form method="get">
+      <div class="form-group row">
+        <div class="col-lg-3 col-md-9 col-sm-12 mb-lg-0 mb-6 ml-10 mt-5">
+          <input type="text" class="form-control datatable-input" placeholder="Qidirish" value="{{ request.GET.search }}" name="search" data-col-index="0" />
+        </div>
+        <button type="submit" class="btn btn-primary font-weight-bolder mt-5 ml-7 mb-1">
+          <span class="nav-icon"><i class="fas fa-search"></i></span>
+          <span class="nav-text">Qidiruv</span>
+        </button>
+      </div>
+    </form>
+    <div class="card-body">
+      <!-- begin: Datatable -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Nomi</th>
+            <th scope="col">Narxi</th>
+            <th scope="col">Qoldiq</th>
+            <th scope="col">Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in object_list %}
+            <tr>
+              <th scope="row">
+                <a href="/products/{{ product.pk }}/"> {{ product.title }} </a>
+              </th>
+              <td> {{ product.price|intcomma }} UZS</td>
+              <td> {{ product.warehouse_quantity }} </td>
+              <td nowrap="nowrap">
+                <a href="/products/{{ product.pk }}/" class="btn btn-sm btn-clean btn-icon" title="Tahrirlash"><i class="la la-edit"></i></a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- end: Datatable -->
+
+      <div></div>
+      <!-- end:: Pagination -->
+    </div>
+    <link rel="stylesheet" href="/static/assets/css/modalstyle.css" media="screen" />
+  </div>
+{% endblock %}

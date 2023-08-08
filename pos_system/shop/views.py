@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, View
 from . import models
 
@@ -66,7 +66,7 @@ class ProductDetail(View):
         product.price = price
         product.count_in_box = count_in_box
         product.save()
-        return render(request, "product_detail.html", {"aside_menus": aside_menus, "object": product, "success": True})
+        return redirect("products")
 
 
 class ProductCreate(View):
@@ -95,5 +95,5 @@ class ProductCreate(View):
                 "message_list": errors,
             }
             return render(request, "product_create.html", cnt)
-        product = models.Product.objects.create(title=title, price=price, count_in_box=count_in_box)
-        return render(request, "product_detail.html", {"aside_menus": aside_menus, "object": product, "success": True})
+        models.Product.objects.create(title=title, price=price, count_in_box=count_in_box)
+        return redirect("products")
