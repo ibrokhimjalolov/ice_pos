@@ -15,3 +15,15 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(models.Consumer)
 class ConsumerAdmin(admin.ModelAdmin):
     inlines = [ProductConsumerPriceInline]
+    
+
+
+class OrderProductInline(admin.StackedInline):
+    model = models.OrderProduct
+    extra = 0
+
+    
+    
+@admin.register(models.Order)
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [OrderProductInline]

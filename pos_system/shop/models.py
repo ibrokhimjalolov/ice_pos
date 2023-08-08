@@ -21,7 +21,7 @@ class Consumer(models.Model):
 class Product(models.Model):
     class Meta:
         db_table = 'product'
-    title = models.CharField(max_length=500)
+    title = models.CharField(max_length=500, unique=True)
     price = models.PositiveIntegerField()
     count_in_box = models.PositiveIntegerField(default=1)
     stock_quantity = models.PositiveBigIntegerField(default=0, editable=False)
