@@ -10,11 +10,10 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="UIC API",
+        title="POS API",
         default_version="v1",
-        description="UIC Group",
+        description="POS system",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="info@uic.group"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,

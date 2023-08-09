@@ -3,7 +3,7 @@ from rest_framework import serializers
 from . import models as shop_models
 
 
-class ProductListSerializer(serializers.ModelSerializer):
+class ProductListCreateSerializer(serializers.ModelSerializer):
     consumer_price = serializers.SerializerMethodField()
     
     class Meta:
@@ -12,14 +12,16 @@ class ProductListSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "price",
+            "count_in_box",
+            "stock_quantity",
             "consumer_price",
         )
+        read_only_fields = ("id", "stock_quantity", "consumer_price")
         
     def get_consumer_price(self, obj):
         if "consumer" in self.context:
             return obj.get_price_for(self.context["consumer"])
         return obj.price
-
 
 
 class CreateOrderProduct(serializers.Serializer):
@@ -68,3 +70,15 @@ class ConsumerListSerializer(serializers.ModelSerializer):
             "phone_number",
             "phone_number2",
         )
+
+
+class ConsumerListCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = shop_models.Consumer
+        fields = (
+            "id",
+            "fio",
+            "phone_number",
+            "phone_number2",
+        )
+        read_only_fields = ("id",)

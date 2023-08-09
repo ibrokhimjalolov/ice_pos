@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView, RetrieveUpdateAPIView, ListCreateAPIView
 from . import models as shop_models
 from . import serializers as shop_serializers
 from django_filters.rest_framework import DjangoFilterBackend
@@ -6,9 +6,13 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 
 
-class ProductListAPIView(ListAPIView):
+class ProductListCreateAPIView(ListCreateAPIView):
+    """
+    ?consumer=123 oziga mos narxi olish uchun
+    """
+
     queryset = shop_models.Product.objects.all().order_by("title")
-    serializer_class = shop_serializers.ProductListSerializer
+    serializer_class = shop_serializers.ProductListCreateSerializer
     filter_backends = [DjangoFilterBackend,SearchFilter, OrderingFilter]
     search_fields = ["title"]
     
@@ -23,9 +27,9 @@ class ProductListAPIView(ListAPIView):
         return cnt
 
 
-class ProductDetailAPIView(RetrieveAPIView):
-    queryset = shop_models.Product.objects.all().order_by("title")
-    serializer_class = shop_serializers.ProductListSerializer
+class ProductDetailUpdateAPIView(RetrieveUpdateAPIView):
+    queryset = shop_models.Product.objects.all()
+    serializer_class = shop_serializers.ProductListCreateSerializer
     
     def get_queryset(self):
         return self.queryset.all()  
@@ -43,9 +47,9 @@ class CreateOrderAPIView(CreateAPIView):
 
 
 
-class ConsumerListAPIView(ListAPIView):
+class ConsumerListCreateAPIView(ListCreateAPIView):
     queryset = shop_models.Consumer.objects.all().order_by("fio")
-    serializer_class = shop_serializers.ConsumerListSerializer
+    serializer_class = shop_serializers.ConsumerListCreateSerializer
     filter_backends = [DjangoFilterBackend,SearchFilter, OrderingFilter]
     search_fields = ["fio"]
     
@@ -54,17 +58,9 @@ class ConsumerListAPIView(ListAPIView):
 
 
 
-class ConsumerDetailAPIView(RetrieveAPIView):
+class ConsumerDetailUpdateAPIView(RetrieveUpdateAPIView):
     queryset = shop_models.Consumer.objects.all().order_by("fio")
-    serializer_class = shop_serializers.ConsumerListSerializer
-    
-    def get_queryset(self):
-        return self.queryset.all()
-
-
-class ConsumerUpdateAPIView(RetrieveAPIView):
-    queryset = shop_models.Consumer.objects.all().order_by("fio")
-    serializer_class = shop_serializers.ConsumerListSerializer
+    serializer_class = shop_serializers.ConsumerListCreateSerializer
     
     def get_queryset(self):
         return self.queryset.all()

@@ -4,11 +4,9 @@ from . import api_views
 urlpatterns = [
     path("create-order/", api_views.CreateOrderAPIView.as_view(), name="create-order"),
 
-    path("product-list/", api_views.ProductListAPIView.as_view(), name="product-list"),
-    path("product-detail/<pk>/", api_views.ProductDetailAPIView.as_view(), name="product-detail"),
+    path("products/", api_views.ProductListCreateAPIView.as_view(), name="product-list"),
+    path("products/<int:pk>/", api_views.ProductDetailUpdateAPIView.as_view(), name="products-detail"),
     
-    path("consumer-list/", api_views.ConsumerListAPIView.as_view(), name="consumer-list"),
-    path("consumer-detail/<pk>/", api_views.ConsumerDetailAPIView.as_view(), name="consumer-detail"),
-    
-
+    path("consumers/", api_views.ConsumerListCreateAPIView.as_view(), name="consumer-list"),
+    path("consumers/<int:pk>/", api_views.ConsumerDetailUpdateAPIView.as_view(), name="consumer-detail"),
 ]
