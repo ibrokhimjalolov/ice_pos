@@ -1,10 +1,21 @@
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from . import models as shop_models
 
 
+class ConsumerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = shop_models.Consumer
+        fields = (
+            "id",
+            "fio",
+            "phone_number",
+            "phone_number2",
+        )
+
+
 class ProductListCreateSerializer(serializers.ModelSerializer):
-    consumer_price = serializers.SerializerMethodField()
     
     class Meta:
         model = shop_models.Product
@@ -14,14 +25,27 @@ class ProductListCreateSerializer(serializers.ModelSerializer):
             "price",
             "count_in_box",
             "stock_quantity",
-            "consumer_price",
         )
-        read_only_fields = ("id", "stock_quantity", "consumer_price")
-        
+        read_only_fields = ("id", "stock_quantity")
+
+
+class ProductSearchSerializer(serializers.ModelSerializer):
+    consumer_price = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = shop_models.Product
+        fields = (
+            "id",
+            "title",
+            "price",
+            "consumer_price",
+            "count_in_box",
+            "stock_quantity",
+        )
+    
     def get_consumer_price(self, obj):
-        if "consumer" in self.context:
-            return obj.get_price_for(self.context["consumer"])
-        return obj.price
+        return obj.get_price_for(self.context["consumer"])
+
 
 
 class CreateOrderProduct(serializers.Serializer):
@@ -31,6 +55,8 @@ class CreateOrderProduct(serializers.Serializer):
 
 class CreateOrderSerializer(serializers.ModelSerializer):
     products = CreateOrderProduct(many=True)
+    full_paid = serializers.BooleanField(required=True)
+    price_paid = serializers.IntegerField(required=False)
     
     class Meta:
         model = shop_models.Order
@@ -39,10 +65,21 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             "consumer",
             "created_at",
             "products",
+            "full_paid",
+            "price_paid",
         )
+        
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs["full_paid"]:
+            if not isinstance(attrs.get("price_paid", None), int):
+                raise ValidationError({"price_paid": "required!"}, code="required")
+        return attrs
         
     def create(self, validated_data):
         products = validated_data.pop("products")
+        full_paid = validated_data.pop("full_paid")
+        price_paid = validated_data.pop("price_paid", None)
         order = shop_models.Order.objects.create(**validated_data)
         total_price = 0
         for product in products:
@@ -57,8 +94,54 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 quantity=quantity,
             )
         order.total_price = total_price
+        if order.paid_price > order.total_price:
+            raise ValidationError({"price_paid": "gte total_price"}, code="greater_then_total_price")
+        
+        if full_paid:
+            order.paid_price = total_price
+        else:
+            order.paid_price = price_paid
+            debt_price = total_price - price_paid
+            shop_models.ConsumerDebt.objects.create(
+                consumer=order.consumer,
+                order=order,
+                price=debt_price,
+                type=-1
+            )
         order.save()
         return order
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = shop_models.Product
+        fields = (
+            "id",
+            "title",
+        )
+   
+   
+class OrderProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    
+    class Meta:
+        model = shop_models.OrderProduct
+        fields = ("product", "quantity", "price")
+     
+
+class OrderSerializer(serializers.ModelSerializer):
+    products = OrderProductSerializer(many=True)
+    
+    class Meta:
+        model = shop_models.Order
+        fields = (
+            "id",
+            "consumer",
+            "created_at",
+            "products",
+            "total_price",
+            "paid_price",
+        )
 
 
 class ConsumerListSerializer(serializers.ModelSerializer):
@@ -82,3 +165,21 @@ class ConsumerListCreateSerializer(serializers.ModelSerializer):
             "phone_number2",
         )
         read_only_fields = ("id",)
+
+
+
+class ConsumerDebtListSerializer(serializers.ModelSerializer):
+    consumer = ConsumerSerializer()
+    order = OrderSerializer()
+    
+    
+    class Meta:
+        model = shop_models.ConsumerDebt
+        fields = (
+            "id",
+            "consumer",
+            "order",
+            "price",
+            "type",
+            "created_at",
+        )

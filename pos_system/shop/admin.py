@@ -27,3 +27,9 @@ class OrderProductInline(admin.StackedInline):
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderProductInline]
+    ordering = ("-id",)
+    
+    
+@admin.register(models.ConsumerDebt)
+class ConsumerDebtAdmin(admin.ModelAdmin):
+    pass

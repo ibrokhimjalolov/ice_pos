@@ -64,6 +64,7 @@ class Order(models.Model):
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, related_name='orders')
     created_at = models.DateTimeField(auto_now_add=True)
     total_price = models.PositiveIntegerField(default=0, editable=False)
+    paid_price = models.PositiveBigIntegerField(default=0)
     
     def __str__(self) -> str:
         return str(self.consumer)
@@ -80,3 +81,17 @@ class OrderProduct(models.Model):
     
     def __str__(self) -> str:
         return str(self.product)
+
+
+class ConsumerDebt(models.Model):
+    class Meta:
+        db_table = "consumer_debt"
+        
+    created_at = models.DateTimeField(auto_now_add=True)
+    order = models.ForeignKey('Order', related_name='debts', on_delete=models.PROTECT, null=True)
+    consumer = models.ForeignKey('Consumer', related_name='debts', on_delete=models.PROTECT)
+    type = models.SmallIntegerField(choices=((-1, -1), (1, 1)))
+    price = models.PositiveBigIntegerField()
+    
+    def __str__(self) -> str:
+        return f"{self.consumer} {self.price * self.type}"
