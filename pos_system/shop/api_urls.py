@@ -1,15 +1,23 @@
 from django.urls import path
 from . import api_views
 
-urlpatterns = [
-    path("create-order/", api_views.CreateOrderAPIView.as_view(), name="create-order"),
+from rest_framework.routers import DefaultRouter
 
-    path("products/", api_views.ProductListCreateAPIView.as_view(), name="product-list"),
-    path("products/search/", api_views.ProductSearchAPIView.as_view(), name="product-search"),
-    path("products/<int:pk>/", api_views.ProductDetailUpdateAPIView.as_view(), name="products-detail"),
-    
-    path("consumers/", api_views.ConsumerListCreateAPIView.as_view(), name="consumer-list"),
-    path("consumers/<int:pk>/", api_views.ConsumerDetailUpdateAPIView.as_view(), name="consumer-detail"),
-    
+courier_urls = DefaultRouter()
+courier_urls.register('couriers', api_views.CourierViewSet, basename='couriers')
+
+
+consumer_urls = DefaultRouter()
+consumer_urls.register('consumers', api_views.ConsumerViewSet, basename='consumers')
+
+product_urls = DefaultRouter()
+product_urls.register('products', api_views.ProductViewSet, basename='products')
+
+urlpatterns = [
+    path("orders/create/", api_views.CreateOrderAPIView.as_view(), name="order-create"),
+    path("orders/", api_views.OrderListApiView.as_view(), name="order-list"),
     path(("consumer-debts/"), api_views.ConsumerDebtListAPIView.as_view(), name="consumer-debt-list"),
+
 ]
+
+urlpatterns += courier_urls.urls + consumer_urls.urls + product_urls.urls

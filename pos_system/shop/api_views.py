@@ -6,34 +6,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q, Sum
+from rest_framework import status, viewsets
 from . import models as shop_models
 from . import serializers as shop_serializers
 
 
 
-class ProductListCreateAPIView(ListCreateAPIView):
-    queryset = shop_models.Product.objects.all().order_by("title")
-    serializer_class = shop_serializers.ProductListCreateSerializer
-    filter_backends = [DjangoFilterBackend,SearchFilter, OrderingFilter]
+class ProductViewSet(viewsets.ModelViewSet):
+    serializer_class = shop_serializers.ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ["title"]
-    
-    def get_queryset(self):
-        return self.queryset.all()  
 
-
-class ProductDetailUpdateAPIView(RetrieveUpdateAPIView):
-    queryset = shop_models.Product.objects.all()
-    serializer_class = shop_serializers.ProductListCreateSerializer
-    
-    def get_queryset(self):
-        return self.queryset.all()  
-
-
-
-class ProductSearchAPIView(ListAPIView):
-    queryset = shop_models.Product.objects.all()
-    serializer_class = shop_serializers.ProductSearchSerializer
-    
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
@@ -43,13 +26,15 @@ class ProductSearchAPIView(ListAPIView):
             ),
         ]
     )
-
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        pass
     
     def get_queryset(self):
-        return self.queryset.order_by("title")
-
+        return shop_models.Product.objects.all().order_by("title")
+    
     def get_serializer_context(self):
         cnt = super().get_serializer_context()
         if "consumer_id" in self.request.GET:
@@ -73,20 +58,17 @@ class CreateOrderAPIView(CreateAPIView):
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-
-class ConsumerListCreateAPIView(ListCreateAPIView):
-    serializer_class = shop_serializers.ConsumerListCreateSerializer
-    filter_backends = [DjangoFilterBackend,SearchFilter, OrderingFilter]
-    search_fields = ["fio"]
+class OrderListApiView(ListAPIView):
+    serializer_class = shop_serializers.OrderSerializer
     
     def get_queryset(self):
-        return shop_models.Consumer.objects.all().order_by("fio")
-
-
-
-class ConsumerDetailUpdateAPIView(RetrieveUpdateAPIView):
-    serializer_class = shop_serializers.ConsumerListCreateSerializer
+        return shop_models.Order.objects.all()
     
+    
+
+class ConsumerViewSet(viewsets.ModelViewSet):
+    serializer_class = shop_serializers.ConsumerSerializer
+
     def get_queryset(self):
         return shop_models.Consumer.objects.all().order_by("fio")
 
@@ -109,3 +91,11 @@ class ConsumerDebtListAPIView(ListAPIView):
         response.data["total_debt"] = qs.filter(type=1).aggregate(total_debt=Sum("price"))["total_debt"] or 0
         response.data["total_paid"] = qs.filter(type=-1).aggregate(total_paid=Sum("price"))["total_paid"] or 0
         return response
+
+
+
+class CourierViewSet(viewsets.ModelViewSet):
+    serializer_class = shop_serializers.CourierSerializer
+
+    def get_queryset(self):
+        return shop_models.Courier.objects.all().order_by("fio")

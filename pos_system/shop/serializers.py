@@ -15,21 +15,18 @@ class ConsumerSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductListCreateSerializer(serializers.ModelSerializer):
-    
+class CourierSerializer(serializers.ModelSerializer):
     class Meta:
-        model = shop_models.Product
+        model = shop_models.Courier
         fields = (
             "id",
-            "title",
-            "price",
-            "count_in_box",
-            "stock_quantity",
+            "fio",
+            "phone_number",
+            "phone_number2",
         )
-        read_only_fields = ("id", "stock_quantity")
+        
 
-
-class ProductSearchSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     consumer_price = serializers.SerializerMethodField()
     
     class Meta:
@@ -42,11 +39,13 @@ class ProductSearchSerializer(serializers.ModelSerializer):
             "count_in_box",
             "stock_quantity",
         )
+        read_only_fields = ("id", "stock_quantity")
     
     def get_consumer_price(self, obj):
-        return obj.get_price_for(self.context["consumer"])
-
-
+        if "consumer" in self.context:
+            return obj.get_price_for(self.context["consumer"])
+        return obj.price
+    
 
 class CreateOrderProduct(serializers.Serializer):
     product = serializers.PrimaryKeyRelatedField(queryset=shop_models.Product.objects.all())
@@ -131,40 +130,21 @@ class OrderProductSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     products = OrderProductSerializer(many=True)
+    courier = CourierSerializer()
+    consumer = ConsumerSerializer()
     
     class Meta:
         model = shop_models.Order
         fields = (
             "id",
+            "status",
+            "courier",
             "consumer",
             "created_at",
             "products",
             "total_price",
             "paid_price",
         )
-
-
-class ConsumerListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = shop_models.Consumer
-        fields = (
-            "id",
-            "fio",
-            "phone_number",
-            "phone_number2",
-        )
-
-
-class ConsumerListCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = shop_models.Consumer
-        fields = (
-            "id",
-            "fio",
-            "phone_number",
-            "phone_number2",
-        )
-        read_only_fields = ("id",)
 
 
 

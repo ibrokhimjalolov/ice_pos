@@ -6,7 +6,23 @@ from phonenumber_field.modelfields import PhoneNumberField
 class Consumer(models.Model):
     
     class Meta:
+        ordering = ("-id",)
         db_table = 'consumer'
+        
+    fio = models.CharField(max_length=500)
+    phone_number = PhoneNumberField(blank=True, null=True)
+    phone_number2 = PhoneNumberField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return self.fio
+
+
+class Courier(models.Model):
+    
+    class Meta:
+        ordering = ("-id",)
+        db_table = 'courier'
         
     fio = models.CharField(max_length=500)
     phone_number = PhoneNumberField(blank=True, null=True)
@@ -17,9 +33,9 @@ class Consumer(models.Model):
         return self.fio
     
     
-    
 class Product(models.Model):
     class Meta:
+        ordering = ("-id",)
         db_table = 'product'
     title = models.CharField(max_length=500, unique=True)
     price = models.PositiveIntegerField()
@@ -44,6 +60,7 @@ class Product(models.Model):
 
 class ProductConsumerPrice(models.Model):
     class Meta:
+        ordering = ("-id",)
         db_table = 'product_price_consumer'
         unique_together = ('product', 'consumer')
         
@@ -59,19 +76,27 @@ class ProductConsumerPrice(models.Model):
     
 class Order(models.Model):
     class Meta:
+        ordering = ("-id",)
         db_table = 'order'
-        
-    consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, related_name='orders')
+    STATUSES = (
+        ("in_process", "in_process"),
+        ("delivering", "delivering"),
+        ("completed", "Completed"),
+    )
+    status = models.CharField(max_length=16, default="in_process", choices=STATUSES)
+    consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, related_name='orders', null=True, blank=True)
+    courier = models.ForeignKey(Courier, on_delete=models.PROTECT, null=True, blank=True, related_name="orders")
     created_at = models.DateTimeField(auto_now_add=True)
     total_price = models.PositiveIntegerField(default=0, editable=False)
     paid_price = models.PositiveBigIntegerField(default=0)
     
     def __str__(self) -> str:
         return str(self.consumer)
-    
+
 
 class OrderProduct(models.Model):
     class Meta:
+        ordering = ("-id",)
         db_table = 'order_product'
         
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='products')
@@ -84,7 +109,8 @@ class OrderProduct(models.Model):
 
 
 class ConsumerDebt(models.Model):
-    class Meta:
+    class Meta:        
+        ordering = ("-id",)
         db_table = "consumer_debt"
         
     created_at = models.DateTimeField(auto_now_add=True)
