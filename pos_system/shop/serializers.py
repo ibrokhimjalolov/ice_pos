@@ -45,7 +45,7 @@ class ProductSerializer(serializers.ModelSerializer):
         if "consumer" in self.context:
             return obj.get_price_for(self.context["consumer"])
         return obj.price
-    
+
 
 class CreateOrderProduct(serializers.Serializer):
     product = serializers.PrimaryKeyRelatedField(queryset=shop_models.Product.objects.all())
@@ -61,6 +61,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         model = shop_models.Order
         fields = (
             "id",
+            "courier",
             "consumer",
             "created_at",
             "products",
@@ -79,6 +80,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         products = validated_data.pop("products")
         full_paid = validated_data.pop("full_paid")
         price_paid = validated_data.pop("price_paid", None)
+        if "courier" in validated_data and validated_data["courier"]:
+            validated_data["status"] = "delivery"
         order = shop_models.Order.objects.create(**validated_data)
         total_price = 0
         for product in products:
@@ -141,6 +144,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "courier",
             "consumer",
             "created_at",
+            "delivered_at",
             "products",
             "total_price",
             "paid_price",
@@ -163,3 +167,8 @@ class ConsumerDebtListSerializer(serializers.ModelSerializer):
             "type",
             "created_at",
         )
+
+
+class OrderDeliverySerializer(serializers.Serializer):
+    paid_price = serializers.IntegerField(required=True, allow_null=False)
+    full_paid = serializers.BooleanField(required=True, allow_null=False)

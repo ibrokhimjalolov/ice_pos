@@ -33,3 +33,8 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(models.ConsumerDebt)
 class ConsumerDebtAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(models.Courier)
+class CourierAdmin(admin.ModelAdmin):
+    pass

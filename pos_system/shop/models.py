@@ -80,13 +80,14 @@ class Order(models.Model):
         db_table = 'order'
     STATUSES = (
         ("in_process", "in_process"),
-        ("delivering", "delivering"),
+        ("delivery", "delivery"),
         ("completed", "Completed"),
     )
     status = models.CharField(max_length=16, default="in_process", choices=STATUSES)
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, related_name='orders', null=True, blank=True)
     courier = models.ForeignKey(Courier, on_delete=models.PROTECT, null=True, blank=True, related_name="orders")
     created_at = models.DateTimeField(auto_now_add=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
     total_price = models.PositiveIntegerField(default=0, editable=False)
     paid_price = models.PositiveBigIntegerField(default=0)
     

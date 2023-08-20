@@ -7,6 +7,9 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q, Sum
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from . import models as shop_models
 from . import serializers as shop_serializers
 
@@ -46,8 +49,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         return cnt
 
 
-class CreateOrderAPIView(CreateAPIView):
-    serializer_class = shop_serializers.CreateOrderSerializer
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = shop_serializers.OrderSerializer
+    
+    def get_serializer_class(self):
+        if self.action == "create":
+            return shop_serializers.CreateOrderSerializer
+        elif self.action == "delivery":
+            return shop_serializers.OrderDeliverySerializer
+        return shop_serializers.OrderSerializer
+
+    def get_queryset(self):
+        return shop_models.Order.objects.all()
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -55,15 +68,25 @@ class CreateOrderAPIView(CreateAPIView):
         self.perform_create(serializer)
         data = shop_serializers.OrderSerializer(serializer.instance).data
         headers = self.get_success_headers(data)
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-class OrderListApiView(ListAPIView):
-    serializer_class = shop_serializers.OrderSerializer
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)  
     
-    def get_queryset(self):
-        return shop_models.Order.objects.all()
+    def destroy(self, request, *args, **kwargs):
+        pass
     
+    @action(detail=True, methods=['post'])
+    def delivery(self, request, pk):
+        order = get_object_or_404(shop_models.Order, status="delivery", pk=pk)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid()
+        data = serializer.data
+        order.status = "completed"
+        order.delivered_at = timezone.now()
+        if data["full_paid"]:
+            order.paid_price = order.total_price
+        else:
+            order.paid_price = max(order.paid_price + data["paid_price"], order.total_price)
+        order.save()
+        return Response(shop_serializers.OrderSerializer(instance=order).data)
     
 
 class ConsumerViewSet(viewsets.ModelViewSet):
