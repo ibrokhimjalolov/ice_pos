@@ -1,10 +1,19 @@
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.db.models import Sum
 from . import models as shop_models
 
 
-class ConsumerSerializer(serializers.ModelSerializer):
+class ConsumerListSerializer(serializers.ModelSerializer):
+    depts = serializers.SerializerMethodField()
+    
+    def get_depts(self, obj):
+        qs = shop_models.ConsumerDebt.objects.filter(consumer=obj)
+        total_debt = qs.filter(type=-1).aggregate(total_debt=Sum("price"))["total_debt"] or 0
+        total_paid = qs.filter(type=1).aggregate(total_paid=Sum("price"))["total_paid"] or 0
+        return total_paid - total_debt
+
     class Meta:
         model = shop_models.Consumer
         fields = (
@@ -12,7 +21,25 @@ class ConsumerSerializer(serializers.ModelSerializer):
             "fio",
             "phone_number",
             "phone_number2",
+            "depts",
+            "created_at",
         )
+
+
+class ConsumerSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = shop_models.Consumer
+        fields = (
+            "id",
+            "fio",
+            "phone_number",
+            "phone_number2",
+            "created_at",
+        )
+        
+    
 
 
 class CourierSerializer(serializers.ModelSerializer):

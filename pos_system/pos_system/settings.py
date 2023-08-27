@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django_filters",
     "phonenumber_field",
     "drf_yasg",
+    "corsheaders",
     
     "users",
     "shop",
@@ -59,14 +60,15 @@ REST_FRAMEWORK = {
     ),
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",
     "DATE_FORMAT": "%Y-%m-%d",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": "pos_system.paginator.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
 
-
+from rest_framework.pagination import PageNumberPagination
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -104,6 +106,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        "ATOMIC_REQUESTS": True
     }
 }
 
@@ -150,3 +153,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'staticfiles'),)
 
 MEDIA_URL = "media/"
 MEDIA_ROOT =os.path.join(BASE_DIR, 'media')
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ["*"]

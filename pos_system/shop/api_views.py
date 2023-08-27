@@ -82,24 +82,41 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = "completed"
         order.delivered_at = timezone.now()
         if data["full_paid"]:
+            price = order.total_price - order.paid_price
             order.paid_price = order.total_price
         else:
+            price = data["paid_price"]
             order.paid_price = max(order.paid_price + data["paid_price"], order.total_price)
         order.save()
+        if price > 0:
+            shop_models.ConsumerDebt.objects.create(
+                order=order,
+                consumer=order.consumer,
+                type=1,
+                price=price
+            )
         return Response(shop_serializers.OrderSerializer(instance=order).data)
     
 
 class ConsumerViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.ConsumerSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ("fio",)
 
     def get_queryset(self):
         return shop_models.Consumer.objects.all().order_by("fio")
+    
+    def get_serializer_class(self):
+        if self.action == "list":
+            return shop_serializers.ConsumerListSerializer
+        return super().get_serializer_class()
 
 
 
 class ConsumerDebtListAPIView(ListAPIView):
     serializer_class = shop_serializers.ConsumerDebtListSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ("fio",)
     filterset_fields = {
         "consumer": ["exact"],
         "type": ["exact"],
