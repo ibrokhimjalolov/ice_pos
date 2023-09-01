@@ -141,14 +141,6 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         return order
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = shop_models.Product
-        fields = (
-            "id",
-            "title",
-        )
-   
    
 class OrderProductSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
