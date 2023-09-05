@@ -30,8 +30,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - db_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
     restart: always
 
 volumes:
