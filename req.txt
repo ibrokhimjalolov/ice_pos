@@ -3,7 +3,7 @@ djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 django-filter==23.2
 drf_yasg==1.21.7
-django-phonenumber-field
-django-cors-headers
-psycopg2-binary
-django-phonenumbers
+django-phonenumber-field==7.1.0
+django-cors-headers==4.2.0
+psycopg2-binary==2.9.7
+django-phonenumbers==1.0.1
