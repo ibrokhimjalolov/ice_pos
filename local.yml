@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  web: &web
+    container_name: ice_pos_web
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8056:8056
+    volumes:
+      - ./media:/app/media
+      - ./static:/app/static
+    envoriment:
+      - USE_POSTGRES=1
+      - POSTGRES_DB=ice_pos
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      - db
+    command: python manage.py runserver 0.0.0.0:8056
+    restart: always
+  
+  db:
+    image: postgres:13.4-buster
+    container_name: ice_pos_db
+    envoriment:
+      - POSTGRES_DB=ice_pos
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    restart: always
+
+volumes:
+  db_data:
