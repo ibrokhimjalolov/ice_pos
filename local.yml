@@ -11,7 +11,7 @@ services:
     volumes:
       - ./media:/app/media
       - ./static:/app/static
-    envoriment:
+    environment:
       - USE_POSTGRES=1
       - POSTGRES_DB=ice_pos
       - POSTGRES_USER=postgres
@@ -24,7 +24,7 @@ services:
   db:
     image: postgres:13.4-buster
     container_name: ice_pos_db
-    envoriment:
+    environment:
       - POSTGRES_DB=ice_pos
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
