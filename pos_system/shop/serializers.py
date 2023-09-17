@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db.models import Sum
+from django.db import transaction
 from . import models as shop_models
 
 
@@ -102,7 +103,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             if not isinstance(attrs.get("price_paid", None), int):
                 raise ValidationError({"price_paid": "required!"}, code="required")
         return attrs
-        
+    
+    @transaction.atomic
     def create(self, validated_data):
         products = validated_data.pop("products")
         full_paid = validated_data.pop("full_paid")
@@ -129,6 +131,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         if full_paid:
             order.paid_price = total_price
         else:
+            if not order.consumer:
+                raise ValidationError({"consumer": "required when full_paid is false"}, code="consumer_required")
             order.paid_price = price_paid
             debt_price = total_price - price_paid
             shop_models.ConsumerDebt.objects.create(
