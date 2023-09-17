@@ -17,6 +17,7 @@ order_router.register('orders', api_views.OrderViewSet, basename='orders')
 
 urlpatterns = [
     path("consumer-debts/", api_views.ConsumerDebtListAPIView.as_view(), name="consumer-debt-list"),
+    path("most-sold-products/", api_views.MostSoldProductsListAPIView.as_view(), name="most-sold-products-list"),
 ]
 
 urlpatterns += courier_router.urls + consumer_router.urls + product_router.urls + order_router.urls

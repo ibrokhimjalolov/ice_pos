@@ -1,17 +1,18 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView, RetrieveUpdateAPIView, ListCreateAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView, RetrieveUpdateAPIView, ListCreateAPIView, GenericAPIView
 from drf_yasg import openapi
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from . import models as shop_models
 from . import serializers as shop_serializers
+from . import utils
 
 
 
@@ -139,3 +140,64 @@ class CourierViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return shop_models.Courier.objects.all().order_by("fio")
+
+
+
+class MostSoldProductsListAPIView(GenericAPIView):
+    pagination_class = None
+    filter_backends = tuple()
+    FROM_DATE_PARAM = "from_date"
+    TO_DATE_PARAM = "to_date"
+    DATE_FORMAT = "%Y-%m-%d"
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                name=FROM_DATE_PARAM,
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description=f"Format {DATE_FORMAT}"
+            ),
+            openapi.Parameter(
+                name=TO_DATE_PARAM,
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description=f"Format {DATE_FORMAT}"
+            ),
+            openapi.Parameter(
+                name="products_count",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+            ),
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            from_date = utils.parse_date(request.GET.get(self.FROM_DATE_PARAM), self.DATE_FORMAT)
+            to_date = utils.parse_date(request.GET.get(self.TO_DATE_PARAM), self.DATE_FORMAT)
+        except ValueError:
+            return Response({"error": f"Invalid date format. format={self.DATE_FORMAT}"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            products_count = int(request.GET.get("products_count", 10))
+        except ValueError:
+            return Response({"error": "Invalid products_count format. format=int"}, status=status.HTTP_400_BAD_REQUEST)
+        subquery_filter = Q(orderproduct__order__status="completed")
+        if from_date:
+            subquery_filter &= Q(orderproduct__order__created_at__gte=from_date)
+        if to_date:
+            subquery_filter &= Q(orderproduct__order__created_at__lte=to_date)
+        most_sold_products = shop_models.Product.objects.annotate(
+            total_orders=Count('orderproduct', filter=subquery_filter)
+        ).order_by('-total_orders').filter(total_orders__gt=0).values(
+            "id", "title", "price", "count_in_box", "stock_quantity", "total_orders"
+        )[:products_count]
+            
+        
+        results = list(most_sold_products)
+        return Response({
+            "results": results,
+            "results_count": len(results),
+            "requested_count": products_count,
+            "from_date": from_date,
+            "to_date": to_date,
+        })
