@@ -130,6 +130,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         
         if full_paid:
             order.paid_price = total_price
+            order.status = "completed"
         else:
             if not order.consumer:
                 raise ValidationError({"consumer": "required when full_paid is false"}, code="consumer_required")
