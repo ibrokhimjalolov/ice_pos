@@ -102,7 +102,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 class ConsumerViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.ConsumerSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ("fio",)
+    search_fields = ("fio", "phone_number", "phone_number2")
 
     def get_queryset(self):
         return shop_models.Consumer.objects.all().order_by("fio")
@@ -117,7 +117,7 @@ class ConsumerViewSet(viewsets.ModelViewSet):
 class ConsumerDebtListAPIView(ListAPIView):
     serializer_class = shop_serializers.ConsumerDebtListSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ("fio",)
+    search_fields = ("consumer__fio", "consumer__phone_number", "consumer__phone_number2",)
     filterset_fields = {
         "consumer": ["exact"],
         "type": ["exact"],
@@ -137,6 +137,8 @@ class ConsumerDebtListAPIView(ListAPIView):
 
 class CourierViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.CourierSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ("fio", "phone_number", "phone_number2")
 
     def get_queryset(self):
         return shop_models.Courier.objects.all().order_by("fio")
