@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 8057:8057
+      - 8056:8056
     volumes:
       - ./media:/app/media
       - ./static:/app/static
@@ -20,7 +20,7 @@ services:
     depends_on:
       - db
       - redis
-    command: python manage.py runserver 0.0.0.0:8057
+    command: python manage.py runserver 0.0.0.0:8056
     restart: always
   db:
     build:
