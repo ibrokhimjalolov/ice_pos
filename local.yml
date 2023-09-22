@@ -7,10 +7,11 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 8056:8056
+      - 8057:8057
     volumes:
       - ./media:/app/media
       - ./static:/app/static
+      - db_dumps:/var/db_dumps
     environment:
       - USE_POSTGRES=1
       - POSTGRES_DB=ice_pos
@@ -18,11 +19,13 @@ services:
       - POSTGRES_PASSWORD=postgres
     depends_on:
       - db
-    command: python manage.py runserver 0.0.0.0:8056
+      - redis
+    command: python manage.py runserver 0.0.0.0:8057
     restart: always
-  
   db:
-    image: postgres:13.4-buster
+    build:
+      context: .
+      dockerfile: ./DBDockerfile
     container_name: ice_pos_db
     environment:
       - POSTGRES_DB=ice_pos
@@ -32,7 +35,27 @@ services:
       - POSTGRES_PORT=5432
     volumes:
       - db_data:/var/lib/postgresql/data/
+      - db_dumps:/var/db_dumps
+    restart: always
+  redis:
+    image: redis:6.0.9-alpine
+    container_name: ice_pos_redis
     restart: always
 
+  celery_beat:
+    <<: *web
+    container_name: ice_pos_celery_beat
+    ports: []
+    command: celery -A pos_system.celery beat -l info
+    restart: always
+
+  celery_worker:
+    <<: *web
+    container_name: ice_pos_celery_worker
+    command: celery -A pos_system.celery worker -l info
+    ports: []
+    restart: always
+  
 volumes:
   db_data:
+  db_dumps:

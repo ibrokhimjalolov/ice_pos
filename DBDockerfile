@@ -1,0 +1,18 @@
+FROM postgres:13.4-buster
+
+# Install cron and gzip
+RUN apt-get update && apt-get -y install cron gzip
+
+
+# Add your cron job script
+COPY db-dumper.sh /var/db_dumps/db-dumper.sh
+COPY crontab /etc/cron.d/crontab
+
+# Give execute permission to the script
+RUN chmod 0644 /etc/cron.d/crontab
+RUN chmod 0644 /var/db_dumps/db-dumper.sh
+
+RUN crontab /etc/cron.d/crontab
+
+# Start the cron service
+CMD ["postgres"]

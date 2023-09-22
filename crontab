@@ -1,0 +1,2 @@
+# Create hourly database dump and compress it
+0 * * * * sh /var/db_dumps/db-dumper.sh

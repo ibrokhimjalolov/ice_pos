@@ -7,3 +7,6 @@ django-phonenumber-field==7.1.0
 django-cors-headers==4.2.0
 psycopg2-binary==2.9.7
 django-phonenumbers==1.0.1
+celery==5.2.2
+pyTelegramBotAPI==4.13.0
+redis==4.6.0
