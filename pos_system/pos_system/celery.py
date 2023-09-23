@@ -6,7 +6,7 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "pos_system.settings"
 django.setup()
 from django.apps import apps
 from django.conf import settings
-
+from celery.schedules import crontab
 
 class CeleryConfig:
     CELERY_BROKER_URL = "redis://redis:6379"
@@ -26,7 +26,7 @@ app.autodiscover_tasks(lambda: [n.name for n in apps.get_app_configs()])
 app.conf.beat_schedule = {
     "send_db_backup_to_telegramusers_task": {
         "task": "send_db_backup_to_telegramusers_task",
-        # every 2 hour
-        "schedule": 2 * 60 * 60,
+        # every day at 2 pm
+        "schedule": crontab(hour=2, minute=0),
     }
 }
