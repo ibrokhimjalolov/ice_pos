@@ -52,6 +52,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.OrderSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = {
+        "created_at": ["gte", "lte"],
+        "status": ["exact"],
+        "consumer": ["exact"],
+        "courier": ["exact"],
+    }
     
     def get_serializer_class(self):
         if self.action == "create":
