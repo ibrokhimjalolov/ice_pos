@@ -2,8 +2,9 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, Q
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_save
 from .utils import send_order_create_notify
+from django.db import transaction
 
 
 class Consumer(models.Model):
@@ -143,14 +144,18 @@ def update_product_stock_post_save(sender, instance, created, **kwargs):
     Product.objects.filter(id=instance.product_id).update(stock_quantity=models.F("stock_quantity") - instance.quantity)
 
 
-@receiver(post_save, sender=Order)
-def update_product_stock_post_delete(sender, instance, created, **kwargs):
-    if created:
+@receiver(pre_save, sender=Order)
+def update_product_stock_post_delete(sender, instance, **kwargs):
+    if not instance.pk:
         return
     old_instance = Order.objects.get(id=instance.id)
     if instance.status != 'canceled':
         return
     if old_instance.status == 'canceled':
         return
-    for product in instance.products.all():
-        Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") + product.quantity)
+    
+    def reset_stocks(item):
+        for product in item.products.all():
+            Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") + product.quantity)
+    
+    transaction.on_commit(lambda: reset_stocks(instance))

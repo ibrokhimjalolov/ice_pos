@@ -9,6 +9,7 @@ from django.db.models import Q, Sum, Count
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from django.utils import timezone
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from . import models as shop_models
 from . import serializers as shop_serializers
@@ -70,6 +71,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return shop_models.Order.objects.all().select_related("consumer", "courier")
     
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
