@@ -175,6 +175,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_products(self, obj):
         return OrderProductSerializer(obj.products.all().select_related("product"), many=True).data
     
+    status = serializers.CharField(source="get_status_display")
+    
     courier = CourierSerializer()
     consumer = ConsumerShortSerializer()
     
