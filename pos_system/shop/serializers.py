@@ -81,7 +81,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "count_in_box",
             "stock_quantity",
         )
-        read_only_fields = ("id", "stock_quantity")
+        read_only_fields = ("id",)
     
     def get_consumer_price(self, obj):
         if "consumer" in self.context:
