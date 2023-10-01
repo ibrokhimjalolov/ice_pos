@@ -16,7 +16,7 @@ order_router = DefaultRouter()
 order_router.register('orders', api_views.OrderViewSet, basename='orders')
 
 debts_router = DefaultRouter()
-debts_router.register('debts', api_views.OrderViewSet, basename='debts')
+debts_router.register('debts', api_views.DebtsViewSet, basename='debts')
 
 urlpatterns = [
     path("consumer-debts/", api_views.ConsumerDebtListAPIView.as_view(), name="consumer-debt-list"),
