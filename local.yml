@@ -20,7 +20,7 @@ services:
     depends_on:
       - db
       - redis
-    command: gunicorn --workers 5 post_system.wsgi:application --bind 0.0.0.0:8056
+    command: gunicorn --workers 5 pos_system.wsgi:application --bind 0.0.0.0:8056
     restart: always
   db:
     build:
