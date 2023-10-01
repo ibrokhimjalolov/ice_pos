@@ -209,3 +209,20 @@ class ConsumerDebtListSerializer(serializers.ModelSerializer):
 class OrderDeliverySerializer(serializers.Serializer):
     paid_price = serializers.IntegerField(required=True, allow_null=False)
     full_paid = serializers.BooleanField(required=True, allow_null=False)
+
+
+class ConsumerDebtSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        fields = ("id", "consumer", "price")
+        model = shop_models.ConsumerDebt
+
+    def create(self, validated_data):
+        consumer = validated_data["consumer"]
+        price = validated_data["price"]
+        self.instance = shop_models.ConsumerDebt.objects.create(
+            consumer=consumer,
+            price=price,
+            type=1,
+        )
+        return self.instance

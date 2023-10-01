@@ -162,6 +162,11 @@ class ConsumerDebtListAPIView(ListAPIView):
         return response
 
 
+class DebtsViewSet(viewsets.ModelViewSet):
+    serializer_class = shop_serializers.ConsumerDebtSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+
+
 
 class CourierViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.CourierSerializer
