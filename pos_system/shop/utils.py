@@ -21,7 +21,8 @@ def send_order_create_notify(order):
 <b>Kuryer:</b> {{ order.courier.fio | default:"-" }}
 <b>Tolangan:</b> {{ order.paid_price }}
 <b>Narxi:</b> {{ order.total_price }}
-<b>Buyurtma sanasi:</b> {{ order.created_at | date:"Y-m-d H:i:s" }}
+<b>Olingan mahsulotlar:</b>
+{{ products }}
 """
-    content = django.template.Template(html).render(django.template.Context({"order": order}))
+    content = django.template.Template(html).render(django.template.Context({"order": order, "products": "\n".join([f"{i}. {p.product} - {p.count} x {p.price} = {p.count * p.price}" for i, p in enumerate(order.products.all(), 1)])}))
     Bot.send_message(CHAT_ID, content, parse_mode="HTML")

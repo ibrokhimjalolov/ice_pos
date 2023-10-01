@@ -143,9 +143,17 @@ def update_product_stock_post_save(sender, instance, created, **kwargs):
     Product.objects.filter(id=instance.product_id).update(stock_quantity=models.F("stock_quantity") - instance.quantity)
 
 
-@receiver(post_delete, sender=OrderProduct)
+@receiver(post_delete, sender=Order)
 def update_product_stock_post_delete(sender, instance, created, **kwargs):
-    Product.objects.filter(id=instance.product_id).update(stock_quantity=models.F("stock_quantity") + instance.quantity)
+    if created:
+        return
+    old_instance = Order.objects.get(id=instance.id)
+    if instance.status != 'canceled':
+        return
+    if old_instance.status == 'canceled':
+        return
+    for product in instance.products.all():
+        Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") + product.quantity)
 
 
 @receiver(post_save, sender=Order)
