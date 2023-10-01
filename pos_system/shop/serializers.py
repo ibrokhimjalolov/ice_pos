@@ -7,9 +7,9 @@ from . import models as shop_models
 
 
 class ConsumerListSerializer(serializers.ModelSerializer):
-    depts = serializers.SerializerMethodField()
+    debts = serializers.SerializerMethodField()
     
-    def get_depts(self, obj: shop_models.Consumer):
+    def get_debts(self, obj: shop_models.Consumer):
         return obj.get_total_debts()
 
     class Meta:
@@ -19,15 +19,15 @@ class ConsumerListSerializer(serializers.ModelSerializer):
             "fio",
             "phone_number",
             "phone_number2",
-            "depts",
+            "debts",
             "created_at",
         )
 
 
 class ConsumerSerializer(serializers.ModelSerializer):
-    depts = serializers.SerializerMethodField()
+    debts = serializers.SerializerMethodField()
     
-    def get_depts(self, obj: shop_models.Consumer):
+    def get_debts(self, obj: shop_models.Consumer):
         return obj.get_total_debts()
 
     class Meta:
