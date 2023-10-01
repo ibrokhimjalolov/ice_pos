@@ -2,7 +2,7 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, Q
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from .utils import send_order_create_notify
 
 
@@ -138,17 +138,14 @@ class ConsumerDebt(models.Model):
         return f"{self.consumer} {self.price * self.type}"
 
 
-@receiver(post_save, sender=Order)
-def update_product_stock(sender, instance, created, **kwargs):
-    if created:
-        for product in instance.products.all():
-            Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") - product.quantity)
-    else:
-        old_instance = Order.objects.get(id=instance.id)
-        if instance.status == "canceled" and old_instance.status != "canceled":
-            for product in instance.products.all():
-                Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") - product.quantity)
+@receiver(post_save, sender=OrderProduct)
+def update_product_stock_post_save(sender, instance, created, **kwargs):
+    Product.objects.filter(id=instance.product_id).update(stock_quantity=models.F("stock_quantity") - instance.quantity)
 
+
+@receiver(post_delete, sender=OrderProduct)
+def update_product_stock_post_delete(sender, instance, created, **kwargs):
+    Product.objects.filter(id=instance.product_id).update(stock_quantity=models.F("stock_quantity") + instance.quantity)
 
 
 @receiver(post_save, sender=Order)
