@@ -102,7 +102,7 @@ class Order(models.Model):
     courier = models.ForeignKey(Courier, on_delete=models.PROTECT, null=True, blank=True, related_name="orders")
     created_at = models.DateTimeField(auto_now_add=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
-    total_price = models.PositiveIntegerField(default=0, editable=False)
+    total_price = models.PositiveIntegerField(default=0)
     paid_price = models.PositiveBigIntegerField(default=0)
     
     def __str__(self) -> str:
@@ -116,7 +116,7 @@ class OrderProduct(models.Model):
         
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='products')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    price = models.PositiveIntegerField(editable=False)
+    price = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField(default=1)
     
     def __str__(self) -> str:
