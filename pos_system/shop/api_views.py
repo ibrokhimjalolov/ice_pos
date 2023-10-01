@@ -75,8 +75,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         data = shop_serializers.OrderSerializer(serializer.instance).data
+        utils.send_order_create_notify(serializer.instance)
         headers = self.get_success_headers(data)
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)  
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
     
     def destroy(self, request, *args, **kwargs):
         pass

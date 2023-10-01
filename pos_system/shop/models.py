@@ -143,7 +143,7 @@ def update_product_stock_post_save(sender, instance, created, **kwargs):
     Product.objects.filter(id=instance.product_id).update(stock_quantity=models.F("stock_quantity") - instance.quantity)
 
 
-@receiver(post_delete, sender=Order)
+@receiver(post_save, sender=Order)
 def update_product_stock_post_delete(sender, instance, created, **kwargs):
     if created:
         return
@@ -154,9 +154,3 @@ def update_product_stock_post_delete(sender, instance, created, **kwargs):
         return
     for product in instance.products.all():
         Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") + product.quantity)
-
-
-@receiver(post_save, sender=Order)
-def update_product_stock(sender, instance, created, **kwargs):
-    if created:
-        send_order_create_notify(instance)
