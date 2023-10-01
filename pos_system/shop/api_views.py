@@ -54,7 +54,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.OrderSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = {
-        "created_at": ["gte", "lte"],
+        "created_at": ["gte", "lte", "date__gte", "date__lte"],
         "status": ["exact"],
         "consumer": ["exact"],
         "courier": ["exact"],
