@@ -3,6 +3,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum, Q
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from .utils import send_order_create_notify
 
 
 class Consumer(models.Model):
@@ -147,3 +148,10 @@ def update_product_stock(sender, instance, created, **kwargs):
         if instance.status == "canceled" and old_instance.status != "canceled":
             for product in instance.products.all():
                 Product.objects.filter(id=product.product_id).update(stock_quantity=models.F("stock_quantity") - product.quantity)
+
+
+
+@receiver(post_save, sender=Order)
+def update_product_stock(sender, instance, created, **kwargs):
+    if created:
+        send_order_create_notify(instance)

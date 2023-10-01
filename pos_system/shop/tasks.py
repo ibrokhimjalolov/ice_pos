@@ -1,6 +1,7 @@
 import telebot
 import os
 from pos_system.celery import app
+from .utils import Bot, CHAT_ID
 
 
 @app.task(name="send_db_backup_to_telegramusers_task")
@@ -14,14 +15,10 @@ def send_db_backup_to_telegramusers_task():
                 if not most_recent_file.endswith(".gz"):
                     continue
                 print("File Name: ", entry.name)
-                bot = telebot.TeleBot('6663339888:AAGACkXkrUmjm3xq2rWtVUJ4lgPa2CXBo1A')
-                chat_id = '-4046728742'
                 with open(directory_path + most_recent_file, 'rb') as dump:
-                    bot.send_document(chat_id, dump)
-                
+                    Bot.send_document(CHAT_ID, dump)
                 # Delete the zipped dump file
                 os.remove(directory_path + most_recent_file)
             except Exception as e:
                 # Handle any errors here
                 print("Error", directory_path + most_recent_file, e)
-    
