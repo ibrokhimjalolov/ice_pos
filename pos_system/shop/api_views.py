@@ -68,7 +68,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return shop_serializers.OrderSerializer
 
     def get_queryset(self):
-        return shop_models.Order.objects.all()
+        return shop_models.Order.objects.all().select_related("consumer", "courier")
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

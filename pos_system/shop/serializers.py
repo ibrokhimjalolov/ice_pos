@@ -24,6 +24,18 @@ class ConsumerListSerializer(serializers.ModelSerializer):
         )
 
 
+class ConsumerShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = shop_models.Consumer
+        fields = (
+            "id",
+            "fio",
+            "phone_number",
+            "phone_number2",
+            "created_at",
+        )
+
+        
 class ConsumerSerializer(serializers.ModelSerializer):
     debts = serializers.SerializerMethodField()
     
@@ -158,9 +170,13 @@ class OrderProductSerializer(serializers.ModelSerializer):
      
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = OrderProductSerializer(many=True)
+    products = serializers.SerializerMethodField()
+    
+    def get_products(self, obj):
+        return OrderProductSerializer(obj.products.all().select_related("product"), many=True).data
+    
     courier = CourierSerializer()
-    consumer = ConsumerSerializer()
+    consumer = ConsumerShortSerializer()
     
     class Meta:
         model = shop_models.Order
