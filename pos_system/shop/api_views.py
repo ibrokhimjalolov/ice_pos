@@ -105,6 +105,24 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
         return Response(shop_serializers.OrderSerializer(instance=order).data)
     
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk):
+        order = get_object_or_404(shop_models.Order, pk=pk)
+        if order.status == "completed":
+            return Response({"error": "Allaqachon yakunlangan"}, status=status.HTTP_400_BAD_REQUEST)
+        order.status = "completed"
+        order.save()
+        return Response({"success": True}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk):
+        order = get_object_or_404(shop_models.Order, pk=pk)
+        if order.status == "cancel":
+            return Response({"error": "Allaqachon bekor qilingan"}, status=status.HTTP_400_BAD_REQUEST)
+        order.status = "canceled"
+        order.save()
+        return Response({"success": True}, status=status.HTTP_200_OK)
+    
 
 class ConsumerViewSet(viewsets.ModelViewSet):
     serializer_class = shop_serializers.ConsumerSerializer
