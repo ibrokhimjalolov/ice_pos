@@ -9,11 +9,8 @@ from . import models as shop_models
 class ConsumerListSerializer(serializers.ModelSerializer):
     depts = serializers.SerializerMethodField()
     
-    def get_depts(self, obj):
-        qs = shop_models.ConsumerDebt.objects.filter(consumer=obj)
-        total_debt = qs.filter(type=-1).aggregate(total_debt=Sum("price"))["total_debt"] or 0
-        total_paid = qs.filter(type=1).aggregate(total_paid=Sum("price"))["total_paid"] or 0
-        return total_paid - total_debt
+    def get_depts(self, obj: shop_models.Consumer):
+        return obj.get_total_debts()
 
     class Meta:
         model = shop_models.Consumer
@@ -28,7 +25,10 @@ class ConsumerListSerializer(serializers.ModelSerializer):
 
 
 class ConsumerSerializer(serializers.ModelSerializer):
-
+    depts = serializers.SerializerMethodField()
+    
+    def get_depts(self, obj: shop_models.Consumer):
+        return obj.get_total_debts()
 
     class Meta:
         model = shop_models.Consumer
@@ -37,10 +37,12 @@ class ConsumerSerializer(serializers.ModelSerializer):
             "fio",
             "phone_number",
             "phone_number2",
+            "debts",
             "created_at",
         )
-        
-    
+        extra_kwargs = {
+            "debts": {"read_only": True},
+        }
 
 
 class CourierSerializer(serializers.ModelSerializer):

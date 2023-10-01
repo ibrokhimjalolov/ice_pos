@@ -1,6 +1,6 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-
+from django.db.models import Sum
 
 
 class Consumer(models.Model):
@@ -16,6 +16,12 @@ class Consumer(models.Model):
     
     def __str__(self) -> str:
         return self.fio
+    
+    def get_total_debts(self):
+        qs = ConsumerDebt.objects.filter(consumer=self)
+        total_debt = qs.filter(type=-1).aggregate(total_debt=Sum("price"))["total_debt"] or 0
+        total_paid = qs.filter(type=1).aggregate(total_paid=Sum("price"))["total_paid"] or 0
+        return total_paid - total_debt
 
 
 class Courier(models.Model):
