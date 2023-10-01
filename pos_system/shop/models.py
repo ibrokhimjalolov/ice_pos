@@ -1,6 +1,6 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 
 class Consumer(models.Model):
@@ -19,9 +19,13 @@ class Consumer(models.Model):
     
     def get_total_debts(self):
         qs = ConsumerDebt.objects.filter(consumer=self)
-        total_debt = qs.filter(type=-1).aggregate(total_debt=Sum("price"))["total_debt"] or 0
+        # total_debt = qs.filter(type=-1).aggregate(total_debt=Sum("price"))["total_debt"] or 0
         total_paid = qs.filter(type=1).aggregate(total_paid=Sum("price"))["total_paid"] or 0
-        return total_paid - total_debt
+        debt_from_order = Order.objects.filter(~Q(status="canceled"), consumer=self).aggregate(
+            total_debt=Sum("total_price"),
+            total_paid=Sum("paid_price")
+        )
+        return total_paid + (debt_from_order["total_paid"] or 0) - (debt_from_order["total_debt"] or 0)
 
 
 class Courier(models.Model):
@@ -88,6 +92,7 @@ class Order(models.Model):
         ("in_process", "Jarayonda"),
         ("delivery", "Yetkazib berish"),
         ("completed", "Yakunlandi"),
+        ("canceled", "Bekor qilindi")
     )
     status = models.CharField(max_length=16, default="in_process", choices=STATUSES)
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, related_name='orders', null=True, blank=True)

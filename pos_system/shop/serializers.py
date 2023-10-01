@@ -149,13 +149,6 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             if not order.consumer:
                 raise ValidationError({"consumer": "required when full_paid is false"}, code="consumer_required")
             order.paid_price = price_paid
-            debt_price = total_price - price_paid
-            shop_models.ConsumerDebt.objects.create(
-                consumer=order.consumer,
-                order=order,
-                price=debt_price,
-                type=-1
-            )
         order.save()
         return order
 
