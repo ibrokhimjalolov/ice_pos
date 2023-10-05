@@ -24,5 +24,5 @@ def send_order_create_notify(order):
 <b>Olingan mahsulotlar:</b>
 {{ products }}
 """
-    content = django.template.Template(html).render(django.template.Context({"order": order, "products": "\n".join([f"{i}. {p.product} - {p.count} x {p.price} = {p.count * p.price}" for i, p in enumerate(order.products.all(), 1)])}))
+    content = django.template.Template(html).render(django.template.Context({"order": order, "products": "\n".join([f"{i}. {p.product} - {p.quantity} x {p.price} = {p.quantity * p.price}" for i, p in enumerate(order.products.all(), 1)])}))
     Bot.send_message(CHAT_ID, content, parse_mode="HTML")
