@@ -130,6 +130,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         for product in products:
             product_obj = product["product"]
             quantity = product["quantity"]
+            if quantity > product_obj.stock_quantity:
+                raise ValidationError({"products": f"Maxsulot miqdori yetarli emas: {product_obj.stock_quantity}"}, code="stock_quantity")
             price = product_obj.get_price_for(order.consumer)
             total_price += price * quantity
             shop_models.OrderProduct.objects.create(
@@ -140,14 +142,15 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             )
         order.total_price = total_price
         if order.paid_price > order.total_price:
-            raise ValidationError({"price_paid": "gte total_price"}, code="greater_then_total_price")
+            raise ValidationError({"price_paid": "To'langan summa buyurtma narxidan oshmasligi kerak"}, code="price_paid")
         
         if full_paid:
             order.paid_price = total_price
             order.status = "completed"
         else:
             if not order.consumer:
-                raise ValidationError({"consumer": "required when full_paid is false"}, code="consumer_required")
+                # consumer is required when full_paid is false
+                raise ValidationError({"consumer": "Buyurtma beruvchi tanlanmagan"}, code="consumer")
             order.paid_price = price_paid
         order.save()
         return order
