@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from django.utils import timezone
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from . import models as shop_models
 from . import serializers as shop_serializers
 from . import utils
@@ -236,3 +237,9 @@ class MostSoldProductsListAPIView(GenericAPIView):
             "from_date": from_date,
             "to_date": to_date,
         })
+
+
+
+def chek_view(request, pk):
+    order = get_object_or_404(shop_models.Order, pk=pk)
+    return render(request, "check.html", {"order": order})

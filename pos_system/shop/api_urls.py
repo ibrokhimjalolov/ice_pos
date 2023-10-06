@@ -21,6 +21,7 @@ debts_router.register('debts', api_views.DebtsViewSet, basename='debts')
 urlpatterns = [
     path("consumer-debts/", api_views.ConsumerDebtListAPIView.as_view(), name="consumer-debt-list"),
     path("most-sold-products/", api_views.MostSoldProductsListAPIView.as_view(), name="most-sold-products-list"),
+    path("chek/<pk>/", api_views.chek_view, name="chek"),
 ]
 
 urlpatterns += courier_router.urls + consumer_router.urls + product_router.urls + order_router.urls + debts_router.urls

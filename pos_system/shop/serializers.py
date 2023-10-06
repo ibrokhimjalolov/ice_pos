@@ -98,6 +98,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     products = CreateOrderProduct(many=True)
     full_paid = serializers.BooleanField(required=True)
     price_paid = serializers.IntegerField(required=False)
+    original_price = serializers.IntegerField(required=False, read_only=True)
     
     class Meta:
         model = shop_models.Order
@@ -109,6 +110,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             "products",
             "full_paid",
             "price_paid",
+            "original_price",
         )
         
     def validate(self, attrs):
@@ -127,25 +129,30 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             validated_data["status"] = "delivery"
         order = shop_models.Order.objects.create(**validated_data)
         total_price = 0
+        original_price = 0
         for product in products:
             product_obj = product["product"]
             quantity = product["quantity"]
             if quantity > product_obj.stock_quantity:
                 raise ValidationError({"products": f"Maxsulot miqdori yetarli emas: {product_obj.stock_quantity}"}, code="stock_quantity")
             price = product_obj.get_price_for(order.consumer)
+            org_price = product_obj.price
+            original_price += org_price * quantity
             total_price += price * quantity
             shop_models.OrderProduct.objects.create(
                 order=order,
                 product=product_obj,
                 price=price,
+                original_price=org_price,
                 quantity=quantity,
             )
         order.total_price = total_price
+        order.original_price = original_price
         if order.paid_price > order.total_price:
             raise ValidationError({"price_paid": "To'langan summa buyurtma narxidan oshmasligi kerak"}, code="price_paid")
         
         if full_paid:
-            order.paid_price = total_price
+            order.paid_price = order.total_price
             order.status = "completed"
         else:
             if not order.consumer:

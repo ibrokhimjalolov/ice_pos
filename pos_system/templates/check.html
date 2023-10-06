@@ -1,0 +1,140 @@
+{% load mathfilters %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check</title>
+</head>
+  <style>
+  * {
+  margin: 0 auto;
+  font-family: Helvetica;
+}
+body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            max-width: 450px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        /* Title Styles */
+        .title {
+            font-weight: bold;
+        }
+
+        /* Customer Information Styles */
+        .customer-info {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Product Table Styles */
+        .product-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .product-table th {
+            text-align: left;
+            background-color: #f0f0f0;
+            padding: 5px;
+        }
+
+        .product-table td {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        /* Total Styles */
+        .total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Payment Styles */
+        .payment {
+            font-weight: bold;
+            margin-top: 10px;
+        }</style>
+<body>
+    <div class="container">
+        <div class="header">
+            <p>{{ order.created_at | date:"d.m.Y H:i" }}</p>
+            <p>Чек № {{ order.id }}</p>
+        </div>
+        {% if order.consumer %}
+        <p class="title">Клиент: {{ order.consumer.fio }}</p>
+        {% endif %}
+        
+        <table class="product-table">
+            <tr>
+                <th>Наименование</th>
+                <th>К-во</th>
+                <th>Цена</th>
+            </tr>
+            <!-- Loop through data.products here -->
+            <!-- Example row:
+            <tr>
+                <td>Product Name</td>
+                <td>2 (50)</td>
+                <td>100 UZS</td>
+            </tr>
+            -->
+            {% for item in order.products.all %}
+            <tr>
+                <td>{{ item.product }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                    {% if item.original_price != item.price %}
+                    <p>
+                        {{ item.original_price|intcomma }} - 
+                        {{ item.diff|intcomma }} UZS
+                    </p>
+                    {% endif %}
+                    <p>{{ item.price|intcomma }} UZS</p>
+                </td>
+            </tr>
+            {% endfor %}
+          
+         
+        </table>
+        <div class="total">
+            <div>
+                <p class="title">Итого</p>
+            </div>
+            <p>
+                <div>
+                    {% if order.total_price != order.original_price %}
+                        <p>{{ order.original_price|intcomma }} - {{ order.diff|intcomma }} UZS</p>
+                    {% endif %}
+                    <p>{{order.total_price|intcomma }} UZS</p>
+                </div>
+            </p>
+        </div>
+        <p class="payment">Оплата: {{ order.paid_price|intcomma }} UZS</p>
+        {% if order.consumer.get_total_debts %}
+        <p class="payment">Текущий долг: {{ order.consumer.get_total_debts  |intcomma }}</p>
+        {% endif %}
+       
+    </div>
+</body>
+</html>
