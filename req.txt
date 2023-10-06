@@ -11,3 +11,4 @@ celery==5.2.2
 pyTelegramBotAPI==4.13.0
 redis==4.6.0
 gunicorn==20.1.0
+django-mathfilters==1.0.0
