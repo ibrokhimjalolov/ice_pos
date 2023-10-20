@@ -111,6 +111,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             "full_paid",
             "price_paid",
             "original_price",
+            "bulk_sell",
         )
         
     def validate(self, attrs):
@@ -195,6 +196,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "products",
             "total_price",
             "paid_price",
+            "bulk_sell",
         )
 
 

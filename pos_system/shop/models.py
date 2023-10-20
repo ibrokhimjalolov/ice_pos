@@ -98,6 +98,7 @@ class Order(models.Model):
         ("canceled", "Bekor qilindi")
     )
     status = models.CharField(max_length=16, default="in_process", choices=STATUSES)
+    bulk_sell = models.BooleanField(default=False)
     consumer = models.ForeignKey(Consumer, on_delete=models.PROTECT, related_name='orders', null=True, blank=True)
     courier = models.ForeignKey(Courier, on_delete=models.PROTECT, null=True, blank=True, related_name="orders")
     created_at = models.DateTimeField(auto_now_add=True)
