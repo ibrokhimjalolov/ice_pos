@@ -9,6 +9,7 @@ from django.db.models import Q, Sum, Count
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from django.utils import timezone
+from datetime import timedelta
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
@@ -125,7 +126,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = get_object_or_404(shop_models.Order, pk=pk)
         if order.status == "canceled":
             return Response({"error": "Allaqachon bekor qilingan"}, status=status.HTTP_400_BAD_REQUEST)
-        order.status = "canceled"
+        if order.created_at + timedelta(hours=24) < timezone.now():
+            return Response({"error": "24 soatdan keyin bekor qilib bo'lmaydi"}, status=status.HTTP_400_BAD_REQUEST)
         order.save()
         return Response({"success": True}, status=status.HTTP_200_OK)
     
