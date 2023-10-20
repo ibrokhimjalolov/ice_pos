@@ -126,6 +126,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         products = validated_data.pop("products")
         full_paid = validated_data.pop("full_paid")
         price_paid = validated_data.pop("price_paid", None)
+        bulk_sell = validated_data.get("bulk_sell", False)
         if "courier" in validated_data and validated_data["courier"]:
             validated_data["status"] = "delivery"
         order = shop_models.Order.objects.create(**validated_data)
@@ -155,7 +156,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         if full_paid:
             order.paid_price = order.total_price
             order.status = "completed"
-        else:
+        elif not bulk_sell:
             if not order.consumer:
                 # consumer is required when full_paid is false
                 raise ValidationError({"consumer": "Buyurtma beruvchi tanlanmagan"}, code="consumer")
