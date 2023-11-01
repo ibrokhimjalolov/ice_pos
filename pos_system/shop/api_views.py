@@ -223,9 +223,9 @@ class MostSoldProductsListAPIView(GenericAPIView):
             return Response({"error": "Invalid products_count format. format=int"}, status=status.HTTP_400_BAD_REQUEST)
         subquery_filter = Q(orderproduct__order__status="completed")
         if from_date:
-            subquery_filter &= Q(orderproduct__order__created_at__gte=from_date)
+            subquery_filter &= Q(orderproduct__order__created_at__date__gte=from_date)
         if to_date:
-            subquery_filter &= Q(orderproduct__order__created_at__lte=to_date)
+            subquery_filter &= Q(orderproduct__order__created_at__date__lte=to_date)
         most_sold_products = shop_models.Product.objects.annotate(
             total_orders=Sum('orderproduct__quantity', filter=subquery_filter)
         ).order_by('-total_orders').filter(total_orders__gt=0).values(
