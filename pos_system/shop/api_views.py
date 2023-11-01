@@ -204,11 +204,6 @@ class MostSoldProductsListAPIView(GenericAPIView):
                 type=openapi.TYPE_STRING,
                 description=f"Format {DATE_FORMAT}"
             ),
-            openapi.Parameter(
-                name="products_count",
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_INTEGER,
-            ),
         ]
     )
     def get(self, request, *args, **kwargs):
@@ -217,10 +212,6 @@ class MostSoldProductsListAPIView(GenericAPIView):
             to_date = utils.parse_date(request.GET.get(self.TO_DATE_PARAM), self.DATE_FORMAT)
         except ValueError:
             return Response({"error": f"Invalid date format. format={self.DATE_FORMAT}"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            products_count = int(request.GET.get("products_count", 10))
-        except ValueError:
-            return Response({"error": "Invalid products_count format. format=int"}, status=status.HTTP_400_BAD_REQUEST)
         subquery_filter = Q(orderproduct__order__status="completed")
         if from_date:
             subquery_filter &= Q(orderproduct__order__created_at__date__gte=from_date)
@@ -230,14 +221,12 @@ class MostSoldProductsListAPIView(GenericAPIView):
             total_orders=Sum('orderproduct__quantity', filter=subquery_filter)
         ).order_by('-total_orders').filter(total_orders__gt=0).values(
             "id", "title", "price", "count_in_box", "stock_quantity", "total_orders"
-        )[:products_count]
-            
+        )
         
         results = list(most_sold_products)
         return Response({
             "results": results,
             "results_count": len(results),
-            "requested_count": products_count,
             "from_date": from_date,
             "to_date": to_date,
         })
