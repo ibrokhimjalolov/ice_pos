@@ -5,7 +5,7 @@ from drf_yasg import openapi
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, F
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from django.utils import timezone
@@ -236,3 +236,23 @@ class MostSoldProductsListAPIView(GenericAPIView):
 def chek_view(request, pk):
     order = get_object_or_404(shop_models.Order, pk=pk)
     return render(request, "check.html", {"order": order})
+
+
+class BulkSellRemoveView(GenericAPIView):
+    
+    @transaction.atomic
+    def post(self, request, pk):
+        #  dont use signals
+        order = get_object_or_404(shop_models.Order, pk=pk, bulk_sell=True, status="delivery")
+        rem = {}
+        for p_id, q in request.data["data"]:
+            rem[p_id] = q
+        for p in order.products.all():
+            if p.product_id not in rem:
+                continue
+            if p.quantity <= rem[p.product_id]:
+                raise ValueError("Invalid quantity")
+            shop_models.OrderProduct.objects.filter(id=p.id).update(quantity=F("quantity") - rem[p.product_id])
+            shop_models.Product.objects.filter(id=p.product_id).update(stock_quantity=F("stock_quantity") + rem[p.product_id])
+        shop_models.Order.objects.filter(id=order.id).update(status="completed")
+        return Response({"success": True}, status=status.HTTP_200_OK)
