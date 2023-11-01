@@ -157,6 +157,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             order.paid_price = order.total_price
             order.status = "completed"
         elif not bulk_sell:
+            order.status = "completed"
             if not order.consumer:
                 # consumer is required when full_paid is false
                 raise ValidationError({"consumer": "Buyurtma beruvchi tanlanmagan"}, code="consumer")
