@@ -28,6 +28,8 @@ class OrderProductInline(admin.StackedInline):
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderProductInline]
     ordering = ("-id",)
+    list_display = ("id", "consumer", "courier", "status", "total_price", "paid_price", "created_at")
+    list_filter = ("status", "consumer", "courier")
     
     
 @admin.register(models.ConsumerDebt)
