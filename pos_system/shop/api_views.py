@@ -250,7 +250,7 @@ class BulkSellRemoveView(GenericAPIView):
         for p in order.products.all():
             if p.product_id not in rem:
                 continue
-            if p.quantity <= rem[p.product_id]:
+            if p.quantity < rem[p.product_id]:
                 raise ValueError("Invalid quantity")
             shop_models.OrderProduct.objects.filter(id=p.id).update(quantity=F("quantity") - rem[p.product_id])
             shop_models.Product.objects.filter(id=p.product_id).update(stock_quantity=F("stock_quantity") + rem[p.product_id])
