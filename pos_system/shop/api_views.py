@@ -126,8 +126,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = get_object_or_404(shop_models.Order, pk=pk)
         if order.status == "canceled":
             return Response({"error": "Allaqachon bekor qilingan"}, status=status.HTTP_400_BAD_REQUEST)
-        if order.created_at + timedelta(hours=24) < timezone.now():
+        if order.status == "completed" and order.created_at + timedelta(hours=24) < timezone.now():
             return Response({"error": "24 soatdan keyin bekor qilib bo'lmaydi"}, status=status.HTTP_400_BAD_REQUEST)
+        order.status = "canceled"
         order.save()
         return Response({"success": True}, status=status.HTTP_200_OK)
     
