@@ -34,7 +34,9 @@ class OrderAdmin(admin.ModelAdmin):
     
 @admin.register(models.ConsumerDebt)
 class ConsumerDebtAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("id", "order", "consumer", "price", "created_at")
+    list_filter = ("consumer",)
+    ordering = ("-id",)
 
 
 @admin.register(models.Courier)
