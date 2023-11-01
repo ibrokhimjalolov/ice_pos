@@ -162,6 +162,9 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                 # consumer is required when full_paid is false
                 raise ValidationError({"consumer": "Buyurtma beruvchi tanlanmagan"}, code="consumer")
             order.paid_price = price_paid
+        
+        if bulk_sell:
+            order.status = "delivery"
         order.save()
         return order
 
