@@ -254,5 +254,9 @@ class BulkSellRemoveView(GenericAPIView):
                 raise ValueError("Invalid quantity")
             shop_models.OrderProduct.objects.filter(id=p.id).update(quantity=F("quantity") - rem[p.product_id])
             shop_models.Product.objects.filter(id=p.product_id).update(stock_quantity=F("stock_quantity") + rem[p.product_id])
-        shop_models.Order.objects.filter(id=order.id).update(status="completed")
+            
+        total_price = 0
+        for p in order.products.all():
+            total_price += p.quantity * p.price
+        shop_models.Order.objects.filter(id=order.id).update(status="completed", total_price=total_price, paid_price=total_price, delivered_at=timezone.now())
         return Response({"success": True}, status=status.HTTP_200_OK)
