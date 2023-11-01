@@ -227,7 +227,7 @@ class MostSoldProductsListAPIView(GenericAPIView):
         if to_date:
             subquery_filter &= Q(orderproduct__order__created_at__lte=to_date)
         most_sold_products = shop_models.Product.objects.annotate(
-            total_orders=Count('orderproduct', filter=subquery_filter)
+            total_orders=Sum('orderproduct__quantity', filter=subquery_filter)
         ).order_by('-total_orders').filter(total_orders__gt=0).values(
             "id", "title", "price", "count_in_box", "stock_quantity", "total_orders"
         )[:products_count]
