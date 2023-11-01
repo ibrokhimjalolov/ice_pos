@@ -136,5 +136,13 @@ body {
         {% endif %}
        
     </div>
+
+    <script>
+        {% comment %} window.print(); after dom load {% endcomment %}
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+
 </body>
 </html>
