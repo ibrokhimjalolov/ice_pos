@@ -10,6 +10,8 @@ class ProductConsumerPriceInline(admin.StackedInline):
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductConsumerPriceInline]
+    list_display = ("id", "title", "price", "count_in_box", "stock_quantity")
+    ordering = ("title",)
     
     
 @admin.register(models.Consumer)
