@@ -300,3 +300,20 @@ class CPPriceUpdateView(GenericAPIView):
                 ).delete()
                 
         return Response({"success": True})
+
+
+
+class OrderProductsView(GenericAPIView):
+    
+    def get(self, request, pk):
+        order = shop_models.Order.objects.get(pk=pk)
+        data = []
+        for p in order.products.all().select_related("product"):
+            data.append({
+                "product_id": p.product.id,
+                "title": p.product.title,
+                "price": p.price,
+                "original_price": p.original_price,
+                "quantity": p.quantity,
+            })
+        return Response(data, status=200)
