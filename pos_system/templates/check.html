@@ -106,8 +106,7 @@ body {
                 <td>
                     {% if item.original_price != item.price %}
                     <p>
-                        {{ item.original_price|intcomma }} - 
-                        {{ item.diff|intcomma }} UZS
+                        <s>{{ item.original_price|intcomma }} UZS</s> 
                     </p>
                     {% endif %}
                     <p>{{ item.price|intcomma }} UZS</p>
@@ -124,7 +123,7 @@ body {
             <p>
                 <div>
                     {% if order.total_price != order.original_price %}
-                        <p>{{ order.original_price|intcomma }} - {{ order.diff|intcomma }} UZS</p>
+                        <p><s>{{ order.original_price|intcomma }} UZS</s></p>
                     {% endif %}
                     <p>{{order.total_price|intcomma }} UZS</p>
                 </div>
