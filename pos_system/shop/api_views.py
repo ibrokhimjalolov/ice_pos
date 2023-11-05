@@ -261,3 +261,42 @@ class BulkSellRemoveView(GenericAPIView):
             total_price += p.quantity * p.price
         shop_models.Order.objects.filter(id=order.id).update(status="completed", total_price=total_price, paid_price=total_price, delivered_at=timezone.now())
         return Response({"success": True}, status=status.HTTP_200_OK)
+
+
+class CPPriceListView(GenericAPIView):
+    
+    def get(self, request, pk):
+        consumer = shop_models.Consumer.objects.get(pk=pk)
+        prices = {
+            p.product_id: p.price
+            for p in shop_models.ProductConsumerPrice.objects.filter(consumer=consumer)
+        }
+        data = []
+        for product in shop_models.Product.objects.all().order_by("title"):
+            data.append({
+                "id": product.id,
+                "title": product.title,
+                "price": prices.get(product.id),
+            })
+        return Response(data, status=200)
+
+
+
+class CPPriceUpdateView(GenericAPIView):
+    
+    def post(self, request, pk):
+        consumer = shop_models.Consumer.objects.get(pk=pk)
+        
+        for row in request.data["data"]:
+            if row["price"]:
+                shop_models.ProductConsumerPrice.objects.update_or_create(
+                    consumer=consumer,
+                    product_id=row["id"],
+                    defaults={"price": row["price"]}
+                )
+            else:
+                shop_models.ProductConsumerPrice.objects.filter(
+                    consumer=consumer, product_id=row["id"]
+                ).delete()
+                
+        return Response({"success": True})
